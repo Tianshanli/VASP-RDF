@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import MDAnalysis as mda
 from MDAnalysis.analysis import rdf
 from itertools import combinations_with_replacement
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 
 # ------------------------- XDATCAR to PDB Conversion -------------------------
 def read_xdatcar(filename):
@@ -63,7 +63,7 @@ def write_pdb(filename, lattice, atom_types, atom_counts, positions):
             f.write("TER\nENDMDL\n")
 
 # ------------------------- RDF Automatic Analysis -------------------------
-def analyze_rdf_auto(pdb_file, r_max=10.0, bin_width=0.1):
+def analyze_rdf_auto(pdb_file, r_max=6.0, bin_width=0.1):
     """Automatically identify all atom pairs and calculate RDF"""
     # Create Universe and get all element types
     u = mda.Universe(pdb_file)
@@ -81,7 +81,7 @@ def analyze_rdf_auto(pdb_file, r_max=10.0, bin_width=0.1):
         raise ValueError("Unable to generate atom pairs")
     
     # Automatically assign colors (using matplotlib colormap)
-    cmap = get_cmap('tab10')
+    cmap = colormaps.get_cmap('tab10')
     colors = {pair: cmap(i % 10) for i, pair in enumerate(pairs)}
     
     # Compute RDF for each atom pair
@@ -117,9 +117,10 @@ def analyze_rdf_auto(pdb_file, r_max=10.0, bin_width=0.1):
     plt.xlabel(r"Distance ($\AA$)", fontsize=12)
     plt.ylabel("g(r)", fontsize=12)
     plt.legend()
-    plt.grid(alpha=0.3)
+    plt.ylim(0, 5)
+    plt.xlim(0, 6)
     plt.tight_layout()
-    plt.savefig('rdf.png', bbox_inches='tight')
+    plt.savefig('rdf_vasp.png', bbox_inches='tight')
     plt.close()
     print("RDF plot saved as rdf.png")
 
@@ -134,4 +135,4 @@ if __name__ == "__main__":
     print(f"Conversion successful: {input_file} -> {output_file}")
     
     # Automatic RDF analysis
-    analyze_rdf_auto(output_file, r_max=10.0, bin_width=0.1)
+    analyze_rdf_auto(output_file, r_max=6.0, bin_width=0.1)
